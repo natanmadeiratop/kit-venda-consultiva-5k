@@ -1079,24 +1079,9 @@
       object-fit: cover;
       object-position: top center;
       border-radius: 16px;
-      display: none;
+      display: block;
     }
-    .author-photo.loaded { display: block; }
-    .author-photo-placeholder {
-      width: 100%;
-      height: 100%;
-      border-radius: 16px;
-      background: linear-gradient(145deg, #1C1400, #251C00);
-      border: 2px solid rgba(245,162,0,0.35);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 48px;
-      font-weight: 900;
-      color: var(--accent);
-      letter-spacing: -2px;
-    }
-    .author-photo.loaded + .author-photo-placeholder { display: none; }
+    .author-photo-placeholder { display: none; }
     .author-info { flex: 1; }
     .author-name {
       font-size: 28px;
@@ -1864,7 +1849,7 @@
     <p class="section-eyebrow reveal">Criado por</p>
     <div class="author-card reveal reveal-delay-1">
       <div class="author-photo-wrap">
-        <img id="author-photo" src="foto-perfil.jpeg" alt="Natan Madeira" class="author-photo" onload="this.classList.add('loaded')" />
+        <img id="author-photo" src="foto-perfil.jpeg" alt="Natan Madeira" class="author-photo" />
         <div class="author-photo-placeholder">NM</div>
       </div>
       <div class="author-info">
