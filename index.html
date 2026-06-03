@@ -1268,19 +1268,23 @@
 
     /* RESPONSIVIDADE */
     @media (max-width: 768px) {
-      /* HERO */
-      #hero { padding: 60px 5% 60px; min-height: auto; }
+      /* HERO — sem overflow horizontal */
+      #hero { padding: 56px 5% 48px; min-height: auto; overflow: hidden; }
       .hero-inner { grid-template-columns: 1fr; gap: 32px; }
-      .hero-product-name .name-main { font-size: clamp(40px, 11vw, 64px); }
-      .hero-product-name .name-sub { font-size: clamp(60px, 18vw, 100px); }
-      .hero-headline { font-size: clamp(17px, 4.5vw, 22px); }
+      .hero-product-name .name-row { flex-wrap: nowrap; align-items: flex-end; gap: 8px; }
+      .hero-product-name .name-main { font-size: clamp(36px, 10vw, 56px); }
+      .hero-product-name .name-sub { font-size: clamp(52px, 16vw, 88px); }
+      .hero-headline { font-size: clamp(16px, 4.2vw, 20px); }
+      .hero-sub { font-size: 14px; }
+      .hero-tagline { font-size: 13px; }
 
-      /* Substitui visual flutuante por grade simples no mobile */
+      /* Cards do hero: grade 2 colunas, card central full-width primeiro */
       .hero-visual {
         position: static;
         height: auto;
         display: grid;
         grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto auto auto;
         gap: 10px;
         padding: 0;
       }
@@ -1289,41 +1293,85 @@
         transform: none !important;
         animation: none !important;
         width: 100% !important;
-        top: auto !important;
-        left: auto !important;
-        right: auto !important;
-        bottom: auto !important;
+        top: auto !important; left: auto !important;
+        right: auto !important; bottom: auto !important;
       }
+      /* Ordem: central no topo (col-span), depois os 4 em 2x2 */
       .kit-card-main {
         grid-column: 1 / -1;
+        grid-row: 1;
+        order: -1;
         background: linear-gradient(135deg, #1E1600, #2A1E00);
         border: 2px solid rgba(245,162,0,0.45);
       }
-      .kit-card-main .card-icon { font-size: 28px; }
-      .kit-card-main .card-title { font-size: 13px; }
+      .kit-card-1 { grid-row: 2; }
+      .kit-card-2 { grid-row: 2; }
+      .kit-card-3 { grid-row: 3; }
+      .kit-card-4 { grid-row: 3; }
+      .kit-card-main .card-icon { font-size: 26px; margin-bottom: 6px; }
+      .kit-card-main .card-title { font-size: 12px; }
+      .kit-card-main .card-desc { font-size: 11px; }
+      .kit-card .card-icon { font-size: 22px; }
+      .kit-card .card-title { font-size: 10px; }
+      .kit-card .card-desc { font-size: 10px; }
+      .kit-card { padding: 14px 12px; }
 
-      /* Restante */
+      /* DOR — reduz padding para remover espaço vazio */
+      #dor { padding: 64px 5%; }
+      #dor .section-subheadline { margin-bottom: 28px; }
+
+      /* SOLUÇÃO — deliverables 1 coluna no mobile para não cortar */
+      .deliverables-grid { grid-template-columns: 1fr; }
+
+      /* Padding geral das seções */
+      #virada { padding: 64px 5%; }
+      #solucao { padding: 64px 5%; }
+      #conteudo { padding: 64px 5%; }
+      #beneficios { padding: 64px 5%; }
+      #bonus { padding: 64px 5%; }
+      #para-quem { padding: 64px 5%; }
+      #nao-para-quem { padding: 56px 5%; }
+      #oferta { padding: 64px 5%; }
+      #agitacao { padding: 64px 5%; }
+      #objecao { padding: 56px 5%; }
+      #garantia { padding: 56px 5%; }
+      #criado-por { padding: 56px 5%; }
+      #faq { padding: 64px 5%; }
+      #cta-final { padding: 64px 5%; }
+
+      /* Outros grids */
       .pain-grid { grid-template-columns: 1fr; }
-      .deliverables-grid { grid-template-columns: 1fr 1fr; }
       .item-block { grid-template-columns: 1fr; }
       .bonus-grid { grid-template-columns: 1fr; }
       .para-quem-inner { grid-template-columns: 1fr; }
-      .faq-inner { grid-template-columns: 1fr; }
+      .faq-inner { grid-template-columns: 1fr; gap: 32px; }
       .faq-title { position: static; }
       .mini-trust-cards { flex-direction: column; }
-      .trust-badges { gap: 16px; }
+      .trust-badges { gap: 14px; flex-wrap: wrap; justify-content: center; }
       .steps-row { flex-direction: column; align-items: center; }
-      .author-card { flex-direction: column; align-items: center; padding: 32px 24px; gap: 28px; }
+
+      /* Author */
+      .author-card { flex-direction: column; align-items: center; padding: 32px 20px; gap: 24px; }
       .author-photo-wrap { width: 140px; height: 170px; }
       .author-name { font-size: 22px; }
-      .recap-name { padding: 14px 16px; font-size: 13px; }
-      .recap-price { padding: 14px 16px; font-size: 13px; }
-      .recap-total { flex-direction: column; gap: 8px; text-align: center; }
-      .price-card { padding: 32px 24px; }
-      .new-price { font-size: 64px; }
-      .virada-highlight-box { padding: 24px 20px; }
-      .dor-conclusion { padding: 24px 20px; }
-      .beneficios-conclusion { padding: 20px 20px; }
+
+      /* Recap oferta */
+      .recap-grid { border-radius: 16px; }
+      .recap-name { padding: 12px 14px; font-size: 12px; }
+      .recap-price { padding: 12px 14px; font-size: 12px; white-space: nowrap; }
+      .recap-total { flex-direction: column; gap: 6px; text-align: center; padding: 16px; }
+      .price-card { padding: 28px 20px; }
+      .new-price { font-size: 60px; }
+      .btn-cta { font-size: 13px; padding: 16px 24px; }
+
+      /* CTA final — corrige contraste do segundo parágrafo */
+      .cta-final-body { color: rgba(255,255,255,0.88); font-size: 15px; margin-bottom: 28px; }
+
+      /* Misc */
+      .virada-highlight-box { padding: 22px 18px; }
+      .dor-conclusion { padding: 22px 18px; }
+      .beneficios-conclusion { padding: 18px 18px; }
+      .agitacao-consequences { padding: 20px 18px; }
     }
   </style>
 </head>
