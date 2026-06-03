@@ -2062,6 +2062,20 @@
     });
   }, 100);
 
+  // Passa UTMs da página para os links de compra
+  (function() {
+    const utmParams = ['utm_source','utm_medium','utm_campaign','utm_term','utm_content'];
+    const search = new URLSearchParams(window.location.search);
+    const utms = new URLSearchParams();
+    utmParams.forEach(p => { if (search.get(p)) utms.set(p, search.get(p)); });
+    if ([...utms].length === 0) return;
+    document.querySelectorAll('a.btn-cta').forEach(a => {
+      const url = new URL(a.href);
+      utms.forEach((v, k) => url.searchParams.set(k, v));
+      a.href = url.toString();
+    });
+  })();
+
   function toggleFaq(btn) {
     const item = btn.parentElement;
     const isOpen = item.classList.contains('open');
