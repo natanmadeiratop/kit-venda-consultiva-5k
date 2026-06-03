@@ -3,24 +3,36 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kit Venda Consultiva 5K+</title>
+  <title>Kit Venda Consultiva 5K+ | Natan Madeira</title>
+  <meta name="description" content="Página, formulário e roteiro de call prontos para atrair leads qualificados e conduzir vendas consultivas de R$5 mil a R$100 mil.">
+  <meta name="robots" content="index, follow">
+  <meta property="og:title" content="Kit Venda Consultiva 5K+">
+  <meta property="og:description" content="Estrutura completa para vender de R$5k a R$100k com método e clareza.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://natanmadeira.com.br/kit-venda-consultiva">
 
-  <!-- Meta Pixel -->
-  <script>
-    !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-    n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
-    n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
-    t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
-    document,'script','https://connect.facebook.net/en_US/fbevents.js');
-    fbq('init','649890837160587');
-    fbq('track','PageView');
-  </script>
-  <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=649890837160587&ev=PageView&noscript=1"/></noscript>
-  <!-- End Meta Pixel -->
-
+  <!-- Preconnects -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://connect.facebook.net">
+
+  <!-- Fonte: carrega assíncrona com font-display swap, apenas pesos usados -->
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap"></noscript>
+
+  <!-- Meta Pixel: carrega após o conteúdo principal -->
+  <script>
+    window.addEventListener('load', function() {
+      !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+      n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+      document,'script','https://connect.facebook.net/en_US/fbevents.js');
+      fbq('init','649890837160587');
+      fbq('track','PageView');
+    });
+  </script>
+  <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=649890837160587&ev=PageView&noscript=1"/></noscript>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -51,7 +63,7 @@
     html { scroll-behavior: smooth; }
 
     body {
-      font-family: 'Inter', sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       overflow-x: hidden;
       color: var(--text-1);
       background: var(--bg-1);
@@ -1921,7 +1933,10 @@
     <p class="section-eyebrow reveal">Criado por</p>
     <div class="author-card reveal reveal-delay-1">
       <div class="author-photo-wrap">
-        <img id="author-photo" src="/kit-venda-consultiva/foto-perfil.jpeg" alt="Natan Madeira" class="author-photo" />
+        <picture>
+          <source srcset="/kit-venda-consultiva/foto-perfil.webp" type="image/webp">
+          <img id="author-photo" src="/kit-venda-consultiva/foto-perfil.jpeg" alt="Natan Madeira" class="author-photo" width="360" height="440" loading="lazy" decoding="async">
+        </picture>
         <div class="author-photo-placeholder">NM</div>
       </div>
       <div class="author-info">
