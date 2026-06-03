@@ -1268,6 +1268,12 @@
 
     /* RESPONSIVIDADE */
     @media (max-width: 768px) {
+      /* Desabilita animações de reveal no mobile — evita conteúdo invisível */
+      .reveal, .reveal-left, .reveal-right {
+        opacity: 1 !important;
+        transform: none !important;
+        transition: none !important;
+      }
       /* HERO — sem overflow horizontal */
       #hero { padding: 56px 5% 48px; min-height: auto; overflow: hidden; }
       .hero-inner { grid-template-columns: 1fr; gap: 32px; }
@@ -1322,6 +1328,9 @@
 
       /* SOLUÇÃO — deliverables 1 coluna no mobile para não cortar */
       .deliverables-grid { grid-template-columns: 1fr; }
+
+      /* Solução — remove espaço excessivo */
+      .solucao-body { margin-bottom: 20px; }
 
       /* Padding geral das seções */
       #virada { padding: 64px 5%; }
