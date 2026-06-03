@@ -1278,8 +1278,8 @@
       #hero { padding: 56px 5% 48px; min-height: auto; overflow: hidden; }
       .hero-inner { grid-template-columns: 1fr; gap: 32px; }
       .hero-product-name .name-row { flex-wrap: nowrap; align-items: flex-end; gap: 8px; }
-      .hero-product-name .name-main { font-size: clamp(36px, 10vw, 56px); }
-      .hero-product-name .name-sub { font-size: clamp(52px, 16vw, 88px); }
+      .hero-product-name .name-main { font-size: clamp(32px, 9vw, 50px); }
+      .hero-product-name .name-sub { font-size: clamp(46px, 14vw, 76px); }
       .hero-headline { font-size: clamp(16px, 4.2vw, 20px); }
       .hero-sub { font-size: 14px; }
       .hero-tagline { font-size: 13px; }
@@ -1329,8 +1329,9 @@
       /* SOLUÇÃO — deliverables 1 coluna no mobile para não cortar */
       .deliverables-grid { grid-template-columns: 1fr; }
 
-      /* Solução — remove espaço excessivo */
-      .solucao-body { margin-bottom: 20px; }
+      /* Solução — espaçamento correto entre parágrafos */
+      .solucao-body { margin-bottom: 16px; }
+      .solucao-body + .solucao-body { margin-top: 0; }
 
       /* Padding geral das seções */
       #virada { padding: 64px 5%; }
