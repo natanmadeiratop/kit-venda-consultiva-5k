@@ -1,0 +1,15 @@
+name = "editor-video"
+main = "worker.js"
+compatibility_date = "2026-01-01"
+
+routes = [
+  { pattern = "natanmadeira.com.br/editor-video*", zone_name = "natanmadeira.com.br" }
+]
+
+[assets]
+directory = "public"
+binding = "ASSETS"
+run_worker_first = ["/editor-video/api/*"]
+
+[observability]
+enabled = true

@@ -1,0 +1,634 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎬</text></svg>">
+<title>Editor de Vídeo — Clone IA</title>
+<style>
+  :root{
+    --bg:#0e1116; --card:#171c24; --card2:#1e2530; --border:#2a3342;
+    --text:#e8edf4; --muted:#93a1b5; --accent:#4f8cff; --accent2:#3b6fd4;
+    --ok:#3ecf8e; --warn:#f5b544; --err:#ff6b6b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.5}
+  .wrap{max-width:860px;margin:0 auto;padding:24px 16px 80px}
+  h1{font-size:1.5rem;margin:8px 0 4px}
+  h1 span{color:var(--accent)}
+  .sub{color:var(--muted);margin:0 0 24px;font-size:.95rem}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px}
+  .card h2{font-size:1.05rem;margin:0 0 14px;display:flex;align-items:center;gap:8px}
+  label{display:block;font-size:.85rem;color:var(--muted);margin:12px 0 4px}
+  input[type=text],input[type=password],input[type=number],select,textarea{
+    width:100%;background:var(--card2);border:1px solid var(--border);border-radius:8px;
+    color:var(--text);padding:10px 12px;font-size:.95rem;font-family:inherit}
+  textarea{font-family:ui-monospace,monospace;font-size:.85rem}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent)}
+  .row{display:flex;gap:12px;flex-wrap:wrap}
+  .row>div{flex:1;min-width:140px}
+  button{background:var(--accent);color:#fff;border:0;border-radius:8px;padding:10px 18px;
+    font-size:.95rem;font-weight:600;cursor:pointer}
+  button:hover{background:var(--accent2)}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  button.ghost{background:transparent;border:1px solid var(--border);color:var(--text);font-weight:500}
+  button.ghost:hover{border-color:var(--accent);background:transparent}
+  button.big{width:100%;padding:14px;font-size:1.05rem;margin-top:16px}
+  .hint{font-size:.8rem;color:var(--muted);margin-top:6px}
+  .hint a{color:var(--accent)}
+  .badge{display:inline-block;font-size:.72rem;font-weight:700;padding:2px 10px;border-radius:99px;text-transform:uppercase;letter-spacing:.04em}
+  .b-wait{background:#2a3342;color:var(--muted)}
+  .b-run{background:#1d3a6e;color:#9cc0ff}
+  .b-ok{background:#123b2b;color:var(--ok)}
+  .b-err{background:#4a1d1d;color:var(--err)}
+  .chunk{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-top:10px}
+  .chunk-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .chunk-head strong{font-size:.95rem}
+  .chunk-head .spacer{flex:1}
+  .chunk video{width:150px;border-radius:8px;margin-top:10px;background:#000}
+  .chunk .err-msg{color:var(--err);font-size:.85rem;margin-top:8px;white-space:pre-wrap}
+  .chunk details{margin-top:8px}
+  .chunk summary{cursor:pointer;font-size:.82rem;color:var(--muted)}
+  #status-line{font-size:.92rem;color:var(--muted);margin-top:14px;min-height:1.4em;white-space:pre-wrap}
+  #clone-preview{max-width:110px;border-radius:10px;display:block;margin-top:8px}
+  progress{width:100%;height:8px;margin-top:10px;accent-color:var(--accent)}
+  .final video{width:100%;max-width:360px;border-radius:12px;background:#000;display:block;margin:12px 0}
+  .ok-text{color:var(--ok)} .warn-text{color:var(--warn)}
+  .cfg-status{font-size:.85rem;margin-left:auto}
+  details.cfg>summary{list-style:none;cursor:pointer}
+  details.cfg>summary::-webkit-details-marker{display:none}
+  .divider{border:0;border-top:1px solid var(--border);margin:18px 0}
+  .drop{border:2px dashed var(--border);border-radius:10px;padding:14px;text-align:center;color:var(--muted);font-size:.9rem;margin-top:10px}
+  .drop.drag{border-color:var(--accent);color:var(--text)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🎬 Editor de Vídeo <span>Clone IA</span></h1>
+  <p class="sub">Cole um link do Instagram → o vídeo é cortado em pedaços → cada pedaço é recriado com o seu clone (Gemini/Veo) → tudo é juntado no vídeo final. O processamento roda aqui no seu navegador; seus arquivos e sua chave não passam por servidor nenhum além do Google.</p>
+
+  <!-- ██ CONFIGURAÇÃO ██ -->
+  <div class="card">
+    <details class="cfg" id="cfg-details">
+      <summary><h2>⚙️ Configuração <span class="cfg-status" id="cfg-status"></span></h2></summary>
+      <label for="cfg-key">Chave da API do Gemini</label>
+      <input type="password" id="cfg-key" placeholder="AIza..." autocomplete="off">
+      <p class="hint">Crie a sua em <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a>. A chave fica salva só neste navegador (localStorage). A geração de vídeo com Veo é paga — confira sua cota no AI Studio.</p>
+
+      <label for="cfg-clone">Foto do clone (rosto nítido, de frente, boa iluminação)</label>
+      <input type="file" id="cfg-clone" accept="image/jpeg,image/png,image/webp">
+      <img id="clone-preview" hidden alt="Prévia do clone">
+
+      <div class="row">
+        <div>
+          <label for="cfg-chunk">Duração de cada pedaço (s)</label>
+          <input type="number" id="cfg-chunk" min="2" max="60" value="10">
+        </div>
+        <div>
+          <label for="cfg-veodur">Duração dos clipes gerados (s)</label>
+          <select id="cfg-veodur">
+            <option value="10" selected>10</option>
+            <option value="8">8</option>
+            <option value="6">6</option>
+            <option value="4">4</option>
+          </select>
+        </div>
+        <div>
+          <label for="cfg-res">Resolução da geração</label>
+          <select id="cfg-res">
+            <option value="720p" selected>720p</option>
+            <option value="1080p">1080p</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="cfg-veomodel">Modelo de vídeo (Veo)</label>
+          <input type="text" id="cfg-veomodel" value="veo-3.1-generate-preview">
+        </div>
+        <div>
+          <label for="cfg-descmodel">Modelo de descrição</label>
+          <input type="text" id="cfg-descmodel" value="gemini-2.5-flash">
+        </div>
+      </div>
+      <div class="row" style="margin-top:16px">
+        <button id="btn-save">Salvar configuração</button>
+        <button class="ghost" id="btn-test">Testar conexão</button>
+      </div>
+      <div id="cfg-msg" class="hint"></div>
+    </details>
+  </div>
+
+  <!-- ██ ENTRADA ██ -->
+  <div class="card">
+    <h2>1️⃣ Vídeo de origem</h2>
+    <label for="in-url">Link do Instagram (post, reel ou vídeo)</label>
+    <input type="text" id="in-url" placeholder="https://www.instagram.com/reel/XXXXXXXX/">
+    <div class="drop" id="drop">…ou arraste/escolha um arquivo de vídeo
+      <br><input type="file" id="in-file" accept="video/*" style="margin-top:8px">
+    </div>
+    <label style="margin-top:14px"><input type="checkbox" id="in-skip"> Só cortar e juntar (teste — não usa o Gemini nem gasta créditos)</label>
+    <button class="big" id="btn-run">▶ Processar vídeo</button>
+    <button class="ghost" id="btn-cancel" hidden style="width:100%;margin-top:8px">✖ Cancelar</button>
+    <div id="status-line"></div>
+    <progress id="prog" value="0" max="100" hidden></progress>
+  </div>
+
+  <!-- ██ PEDAÇOS ██ -->
+  <div class="card" id="chunks-card" hidden>
+    <h2>2️⃣ Pedaços</h2>
+    <div id="chunks"></div>
+  </div>
+
+  <!-- ██ FINAL ██ -->
+  <div class="card final" id="final-card" hidden>
+    <h2>3️⃣ Vídeo final</h2>
+    <video id="final-video" controls></video>
+    <a id="final-dl" download="video-final.mp4"><button>⬇ Baixar vídeo final</button></a>
+    <button class="ghost" id="btn-rejoin" style="margin-left:8px">↻ Juntar de novo</button>
+  </div>
+
+  <p class="hint">⚠️ Use apenas com vídeos seus ou com autorização do autor, e gere apenas o seu próprio clone (ou de quem autorizou). A qualidade da semelhança depende da foto de referência.</p>
+</div>
+
+<script src="vendor/ffmpeg.js"></script>
+<script src="vendor/ffmpeg-util.js"></script>
+<script>
+"use strict";
+const $ = (id) => document.getElementById(id);
+const GL = "https://generativelanguage.googleapis.com/v1beta";
+const CFG_KEY = "editorVideoConfig";
+
+const DESCRIBE_PROMPT = `Você é um diretor de cena escrevendo prompts para o gerador de vídeo Veo.
+Assista ao vídeo em anexo e escreva UM prompt em inglês para recriar a cena
+com outra pessoa (a "referência" fornecida como imagem) no lugar da pessoa do vídeo.
+O prompt deve conter:
+1. Descrição do cenário, iluminação, enquadramento e movimentos de câmera.
+2. As ações e gestos da pessoa, em ordem cronológica.
+3. A fala COMPLETA e LITERAL, transcrita palavra por palavra, no idioma original,
+   entre aspas, para a pessoa dizer exatamente o mesmo texto.
+4. O tom de voz e a energia da fala.
+Refira-se à pessoa apenas como "the person from the reference image".
+Responda SOMENTE com o prompt, sem comentários nem markdown.`;
+
+// ---------- configuração ----------
+function loadCfg() {
+  try { return JSON.parse(localStorage.getItem(CFG_KEY)) || {}; }
+  catch { return {}; }
+}
+function saveCfg(cfg) { localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); }
+
+let cloneImage = null; // {dataUrl, mime}
+
+function refreshCfgStatus() {
+  const cfg = loadCfg();
+  const ok = cfg.apiKey && cfg.cloneImage;
+  $("cfg-status").innerHTML = ok
+    ? '<span class="ok-text">✓ configurado</span>'
+    : '<span class="warn-text">⚠ falta configurar</span>';
+  if (!ok) $("cfg-details").open = true;
+}
+
+function initCfg() {
+  const cfg = loadCfg();
+  if (cfg.apiKey) $("cfg-key").value = cfg.apiKey;
+  if (cfg.chunkDuration) $("cfg-chunk").value = cfg.chunkDuration;
+  if (cfg.veoDuration) $("cfg-veodur").value = String(cfg.veoDuration);
+  if (cfg.resolution) $("cfg-res").value = cfg.resolution;
+  if (cfg.veoModel) $("cfg-veomodel").value = cfg.veoModel;
+  if (cfg.describeModel) $("cfg-descmodel").value = cfg.describeModel;
+  if (cfg.cloneImage) {
+    cloneImage = cfg.cloneImage;
+    $("clone-preview").src = cloneImage.dataUrl;
+    $("clone-preview").hidden = false;
+  }
+  refreshCfgStatus();
+}
+
+$("cfg-clone").addEventListener("change", () => {
+  const f = $("cfg-clone").files[0];
+  if (!f) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    cloneImage = { dataUrl: reader.result, mime: f.type || "image/jpeg" };
+    $("clone-preview").src = cloneImage.dataUrl;
+    $("clone-preview").hidden = false;
+  };
+  reader.readAsDataURL(f);
+});
+
+$("btn-save").addEventListener("click", () => {
+  const cfg = {
+    apiKey: $("cfg-key").value.trim(),
+    chunkDuration: Math.max(2, parseInt($("cfg-chunk").value, 10) || 10),
+    veoDuration: parseInt($("cfg-veodur").value, 10),
+    resolution: $("cfg-res").value,
+    veoModel: $("cfg-veomodel").value.trim(),
+    describeModel: $("cfg-descmodel").value.trim(),
+    cloneImage,
+  };
+  try {
+    saveCfg(cfg);
+    $("cfg-msg").textContent = "Configuração salva. ✓";
+  } catch (e) {
+    // foto grande demais para o localStorage: salva o resto e mantém a foto em memória
+    saveCfg({ ...cfg, cloneImage: null });
+    $("cfg-msg").textContent =
+      "Salvo, mas a foto é grande demais para ficar salva no navegador — " +
+      "ela vale só para esta sessão. Use uma foto menor (até ~2 MB) para fixar.";
+  }
+  refreshCfgStatus();
+});
+
+$("btn-test").addEventListener("click", async () => {
+  const key = $("cfg-key").value.trim();
+  if (!key) { $("cfg-msg").textContent = "Informe a chave da API primeiro."; return; }
+  $("cfg-msg").textContent = "Testando…";
+  try {
+    const r = await fetch(`${GL}/models?pageSize=1`, { headers: { "x-goog-api-key": key } });
+    $("cfg-msg").textContent = r.ok
+      ? "Conexão com o Gemini OK. ✓"
+      : `Falhou (HTTP ${r.status}): ${(await r.text()).slice(0, 300)}`;
+  } catch (e) {
+    $("cfg-msg").textContent = "Erro de rede: " + e.message;
+  }
+});
+
+// ---------- utilitários ----------
+function setStatus(msg) { $("status-line").textContent = msg; }
+
+function u8ToBase64(u8) {
+  let s = "";
+  const CH = 0x8000;
+  for (let i = 0; i < u8.length; i += CH)
+    s += String.fromCharCode.apply(null, u8.subarray(i, i + CH));
+  return btoa(s);
+}
+
+function dataUrlToBase64(dataUrl) { return dataUrl.split(",", 2)[1]; }
+
+// lê duração e resolução com o próprio ffmpeg (o <video> do navegador nem
+// sempre decodifica o codec, ex.: builds do Chromium sem H.264)
+async function ffProbe(ff, name) {
+  let log = "";
+  const onLog = (e) => { log += e.message + "\n"; };
+  ff.on("log", onLog);
+  try { await ff.exec(["-hide_banner", "-i", name]); } catch {}
+  ff.off("log", onLog);
+  const dm = log.match(/Duration:\s*(\d+):(\d+):([\d.]+)/);
+  const rm = log.match(/Video:.*?\s(\d{2,5})x(\d{2,5})/);
+  if (!dm || !rm) throw new Error("Não consegui ler o vídeo (formato não reconhecido).");
+  return {
+    duration: (+dm[1]) * 3600 + (+dm[2]) * 60 + (+dm[3]),
+    width: +rm[1],
+    height: +rm[2],
+  };
+}
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// ---------- ffmpeg.wasm ----------
+let ffmpeg = null;
+async function getFFmpeg() {
+  if (ffmpeg) return ffmpeg;
+  setStatus("Carregando o motor de vídeo (ffmpeg, ~32 MB, só na primeira vez)…");
+  const ff = new FFmpegWASM.FFmpeg();
+  const [coreJs, part0, part1] = await Promise.all([
+    fetch("vendor/ffmpeg-core.js").then((r) => { if (!r.ok) throw new Error("ffmpeg-core.js: " + r.status); return r.blob(); }),
+    fetch("vendor/ffmpeg-core.wasm.part0").then((r) => { if (!r.ok) throw new Error("wasm part0: " + r.status); return r.arrayBuffer(); }),
+    fetch("vendor/ffmpeg-core.wasm.part1").then((r) => { if (!r.ok) throw new Error("wasm part1: " + r.status); return r.arrayBuffer(); }),
+  ]);
+  await ff.load({
+    coreURL: URL.createObjectURL(new Blob([coreJs], { type: "text/javascript" })),
+    wasmURL: URL.createObjectURL(new Blob([part0, part1], { type: "application/wasm" })),
+  });
+  ffmpeg = ff;
+  return ff;
+}
+
+// ---------- API do Gemini ----------
+function apiKey() { return loadCfg().apiKey || $("cfg-key").value.trim(); }
+
+async function geminiDescribe(chunkBytes) {
+  const cfg = loadCfg();
+  const body = {
+    contents: [{
+      parts: [
+        { inline_data: { mime_type: "video/mp4", data: u8ToBase64(chunkBytes) } },
+        { text: DESCRIBE_PROMPT },
+      ],
+    }],
+  };
+  const r = await fetch(`${GL}/models/${cfg.describeModel || "gemini-2.5-flash"}:generateContent`, {
+    method: "POST",
+    headers: { "x-goog-api-key": apiKey(), "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!r.ok) throw new Error(`Descrição falhou (HTTP ${r.status}): ${(await r.text()).slice(0, 500)}`);
+  const data = await r.json();
+  const text = data.candidates?.[0]?.content?.parts?.map((p) => p.text || "").join("").trim();
+  if (!text) throw new Error("O Gemini não retornou a descrição da cena.");
+  return text;
+}
+
+async function veoGenerate(prompt, durationSeconds, aspectRatio, signal) {
+  const cfg = loadCfg();
+  const model = cfg.veoModel || "veo-3.1-generate-preview";
+  const img = cloneImage || cfg.cloneImage;
+  const makeBody = (dur) => ({
+    instances: [{
+      prompt,
+      referenceImages: [{
+        image: { bytesBase64Encoded: dataUrlToBase64(img.dataUrl), mimeType: img.mime },
+        referenceType: "asset",
+      }],
+    }],
+    parameters: {
+      durationSeconds: dur,
+      aspectRatio,
+      resolution: cfg.resolution || "720p",
+      personGeneration: "allow_adult",
+      numberOfVideos: 1,
+    },
+  });
+
+  let dur = durationSeconds;
+  let r = await fetch(`${GL}/models/${model}:predictLongRunning`, {
+    method: "POST", signal,
+    headers: { "x-goog-api-key": apiKey(), "Content-Type": "application/json" },
+    body: JSON.stringify(makeBody(dur)),
+  });
+  if (r.status === 400 && dur > 8) {
+    // o modelo pode não aceitar essa duração; tenta com 8s
+    const errText = await r.text();
+    if (/duration/i.test(errText)) {
+      dur = 8;
+      r = await fetch(`${GL}/models/${model}:predictLongRunning`, {
+        method: "POST", signal,
+        headers: { "x-goog-api-key": apiKey(), "Content-Type": "application/json" },
+        body: JSON.stringify(makeBody(dur)),
+      });
+    } else {
+      throw new Error(`Veo recusou o pedido (HTTP 400): ${errText.slice(0, 500)}`);
+    }
+  }
+  if (!r.ok) throw new Error(`Veo falhou (HTTP ${r.status}): ${(await r.text()).slice(0, 500)}`);
+  const op = await r.json();
+
+  // aguarda a operação terminar (a geração leva de 1 a 5 minutos)
+  const deadline = Date.now() + 15 * 60 * 1000;
+  let result = op;
+  while (!result.done) {
+    if (signal?.aborted) throw new Error("Cancelado.");
+    if (Date.now() > deadline) throw new Error("A geração passou de 15 minutos, desisti.");
+    await sleep(10000);
+    const pr = await fetch(`${GL}/${op.name}`, { headers: { "x-goog-api-key": apiKey() }, signal });
+    if (!pr.ok) throw new Error(`Erro ao consultar a operação (HTTP ${pr.status}).`);
+    result = await pr.json();
+  }
+  if (result.error) throw new Error("Veo retornou erro: " + JSON.stringify(result.error).slice(0, 500));
+
+  const resp = result.response || {};
+  const gen = resp.generateVideoResponse || resp;
+  const sample = gen.generatedSamples?.[0] || gen.generatedVideos?.[0];
+  const uri = sample?.video?.uri;
+  if (!uri) {
+    const filtered = gen.raiMediaFilteredReasons || gen.raiMediaFilteredCount;
+    throw new Error(filtered
+      ? "O Veo filtrou este pedaço por política de conteúdo: " + JSON.stringify(filtered).slice(0, 400)
+      : "Resposta do Veo sem vídeo: " + JSON.stringify(resp).slice(0, 400));
+  }
+
+  let vr = await fetch(uri, { headers: { "x-goog-api-key": apiKey() }, signal });
+  if (!vr.ok) {
+    const sep = uri.includes("?") ? "&" : "?";
+    vr = await fetch(`${uri}${sep}key=${encodeURIComponent(apiKey())}`, { signal });
+  }
+  if (!vr.ok) throw new Error(`Download do clipe gerado falhou (HTTP ${vr.status}).`);
+  return new Uint8Array(await vr.arrayBuffer());
+}
+
+// ---------- pipeline ----------
+let chunks = []; // {i, data, meta, prompt, gen, el}
+let abortCtl = null;
+let sourceMeta = null;
+
+function chunkCard(i) {
+  const el = document.createElement("div");
+  el.className = "chunk";
+  el.innerHTML = `
+    <div class="chunk-head">
+      <strong>Pedaço ${String(i + 1).padStart(2, "0")}</strong>
+      <span class="badge b-wait" data-role="badge">aguardando</span>
+      <span class="spacer"></span>
+      <button class="ghost" data-role="regen" hidden>↻ Regerar</button>
+    </div>
+    <details hidden data-role="prompt-box">
+      <summary>Prompt da cena (editável)</summary>
+      <textarea rows="6" data-role="prompt"></textarea>
+    </details>
+    <div class="err-msg" data-role="err"></div>
+    <div data-role="videos"></div>`;
+  $("chunks").appendChild(el);
+  return el;
+}
+
+function setBadge(el, cls, text) {
+  const b = el.querySelector('[data-role=badge]');
+  b.className = "badge " + cls;
+  b.textContent = text;
+}
+
+function addPreview(el, bytes, label) {
+  const v = document.createElement("video");
+  v.controls = true;
+  v.title = label;
+  v.src = URL.createObjectURL(new Blob([bytes], { type: "video/mp4" }));
+  el.querySelector('[data-role=videos]').appendChild(v);
+}
+
+async function getSourceVideo() {
+  const file = $("in-file").files[0];
+  if (file) {
+    setStatus("Lendo o arquivo enviado…");
+    return new Uint8Array(await file.arrayBuffer());
+  }
+  const link = $("in-url").value.trim();
+  if (!link) throw new Error("Cole um link do Instagram ou envie um arquivo de vídeo.");
+  setStatus("Descobrindo a URL do vídeo no Instagram…");
+  const r = await fetch(`api/resolve?url=${encodeURIComponent(link)}`);
+  const data = await r.json();
+  if (!r.ok) throw new Error(data.error || `Falha ao resolver o link (HTTP ${r.status}).`);
+  setStatus("Baixando o vídeo do Instagram…");
+  const vr = await fetch(`api/fetch?url=${encodeURIComponent(data.videoUrl)}`);
+  if (!vr.ok) throw new Error("Falha ao baixar o vídeo do CDN do Instagram.");
+  return new Uint8Array(await vr.arrayBuffer());
+}
+
+async function splitVideo(bytes) {
+  const cfg = loadCfg();
+  const chunkDur = cfg.chunkDuration || 10;
+  const ff = await getFFmpeg();
+  await ff.writeFile("input.mp4", bytes);
+  sourceMeta = await ffProbe(ff, "input.mp4");
+  const n = Math.max(1, Math.ceil((sourceMeta.duration - 0.05) / chunkDur));
+
+  // reduz para no máx. 720 no menor lado (o pedaço vai inline para o Gemini)
+  let { width: w, height: h } = sourceMeta;
+  const scale = Math.min(1, 720 / Math.min(w, h));
+  w = Math.round((w * scale) / 2) * 2;
+  h = Math.round((h * scale) / 2) * 2;
+
+  chunks = [];
+  $("chunks").innerHTML = "";
+  $("chunks-card").hidden = false;
+
+  for (let i = 0; i < n; i++) {
+    if (abortCtl?.signal.aborted) throw new Error("Cancelado.");
+    setStatus(`Cortando pedaço ${i + 1}/${n}…`);
+    $("prog").value = ((i + 1) / n) * 100;
+    const out = `chunk${i}.mp4`;
+    await ff.exec([
+      "-ss", String(i * chunkDur), "-t", String(chunkDur), "-i", "input.mp4",
+      "-vf", `scale=${w}:${h}`,
+      "-c:v", "libx264", "-preset", "ultrafast", "-crf", "23", "-pix_fmt", "yuv420p",
+      "-c:a", "aac", "-ar", "44100", "-ac", "2",
+      out,
+    ]);
+    const data = (await ff.readFile(out)).slice();
+    await ff.deleteFile(out);
+    const el = chunkCard(i);
+    setBadge(el, "b-ok", "cortado");
+    const dur = Math.min(chunkDur, sourceMeta.duration - i * chunkDur);
+    chunks.push({ i, data, dur, gen: null, prompt: null, el });
+  }
+  await ff.deleteFile("input.mp4");
+}
+
+async function generateChunk(c, aspectRatio) {
+  const cfg = loadCfg();
+  const el = c.el;
+  el.querySelector('[data-role=err]').textContent = "";
+  try {
+    if (!c.prompt) {
+      setBadge(el, "b-run", "descrevendo…");
+      c.prompt = await geminiDescribe(c.data);
+      const box = el.querySelector('[data-role=prompt-box]');
+      box.hidden = false;
+      el.querySelector('[data-role=prompt]').value = c.prompt;
+    }
+    setBadge(el, "b-run", "gerando (1–5 min)…");
+    const dur = Math.min(cfg.veoDuration || 10, Math.max(4, Math.round(c.dur)));
+    c.gen = await veoGenerate(c.prompt, dur, aspectRatio, abortCtl?.signal);
+    setBadge(el, "b-ok", "pronto");
+    addPreview(el, c.gen, "clipe gerado");
+  } catch (e) {
+    setBadge(el, "b-err", "erro");
+    el.querySelector('[data-role=err]').textContent = e.message;
+    throw e;
+  } finally {
+    const regen = el.querySelector('[data-role=regen]');
+    regen.hidden = false;
+    regen.onclick = async () => {
+      c.prompt = el.querySelector('[data-role=prompt]').value.trim() || null;
+      c.gen = null;
+      regen.disabled = true;
+      try { await generateChunk(c, aspectRatio); await joinVideo(); }
+      catch {} finally { regen.disabled = false; }
+    };
+  }
+}
+
+async function joinVideo() {
+  const parts = chunks.map((c) => c.gen || c.data);
+  if (!parts.length) return;
+  const ff = await getFFmpeg();
+  setStatus("Juntando os pedaços no vídeo final…");
+
+  await ff.writeFile("part0.mp4", parts[0]);
+  let { width: w, height: h } = await ffProbe(ff, "part0.mp4");
+  w -= w % 2; h -= h % 2;
+
+  const listLines = [];
+  for (let i = 0; i < parts.length; i++) {
+    setStatus(`Normalizando pedaço ${i + 1}/${parts.length} para a junção…`);
+    if (i > 0) await ff.writeFile(`part${i}.mp4`, parts[i]);
+    await ff.exec([
+      "-i", `part${i}.mp4`,
+      "-vf", `scale=${w}:${h}:force_original_aspect_ratio=decrease,pad=${w}:${h}:(ow-iw)/2:(oh-ih)/2,fps=30`,
+      "-c:v", "libx264", "-preset", "ultrafast", "-crf", "23", "-pix_fmt", "yuv420p",
+      "-c:a", "aac", "-ar", "44100", "-ac", "2",
+      `norm${i}.mp4`,
+    ]);
+    await ff.deleteFile(`part${i}.mp4`);
+    listLines.push(`file 'norm${i}.mp4'`);
+  }
+  await ff.writeFile("list.txt", new TextEncoder().encode(listLines.join("\n") + "\n"));
+  await ff.exec(["-f", "concat", "-safe", "0", "-i", "list.txt", "-c", "copy", "-movflags", "+faststart", "final.mp4"]);
+  const final = (await ff.readFile("final.mp4")).slice();
+  for (let i = 0; i < parts.length; i++) await ff.deleteFile(`norm${i}.mp4`);
+  await ff.deleteFile("list.txt");
+  await ff.deleteFile("final.mp4");
+
+  const url = URL.createObjectURL(new Blob([final], { type: "video/mp4" }));
+  $("final-video").src = url;
+  $("final-dl").href = url;
+  $("final-card").hidden = false;
+  setStatus("Pronto! ✅");
+}
+
+$("btn-rejoin").addEventListener("click", () => joinVideo().catch((e) => setStatus("Erro: " + e.message)));
+
+$("btn-run").addEventListener("click", async () => {
+  const skip = $("in-skip").checked;
+  const cfg = loadCfg();
+  if (!skip) {
+    if (!apiKey()) { setStatus("Configure a chave da API do Gemini primeiro (seção Configuração)."); $("cfg-details").open = true; return; }
+    if (!(cloneImage || cfg.cloneImage)) { setStatus("Envie a foto do clone na seção Configuração."); $("cfg-details").open = true; return; }
+  }
+  $("btn-run").disabled = true;
+  $("btn-cancel").hidden = false;
+  $("prog").hidden = false;
+  $("final-card").hidden = true;
+  abortCtl = new AbortController();
+  try {
+    const bytes = await getSourceVideo();
+    await splitVideo(bytes);
+    if (!skip) {
+      const aspectRatio = sourceMeta.height >= sourceMeta.width ? "9:16" : "16:9";
+      let failed = 0;
+      for (const c of chunks) {
+        if (abortCtl.signal.aborted) throw new Error("Cancelado.");
+        setStatus(`Gerando pedaço ${c.i + 1}/${chunks.length} com o clone…`);
+        try { await generateChunk(c, aspectRatio); }
+        catch (e) { if (abortCtl.signal.aborted) throw e; failed++; }
+      }
+      if (failed) setStatus(`${failed} pedaço(s) falharam — veja os erros e use “Regerar”. Juntando com o que temos…`);
+    }
+    await joinVideo();
+  } catch (e) {
+    setStatus("Erro: " + e.message);
+  } finally {
+    $("btn-run").disabled = false;
+    $("btn-cancel").hidden = true;
+    $("prog").hidden = true;
+  }
+});
+
+$("btn-cancel").addEventListener("click", () => { abortCtl?.abort(); setStatus("Cancelando…"); });
+
+// drag & drop
+const drop = $("drop");
+drop.addEventListener("dragover", (e) => { e.preventDefault(); drop.classList.add("drag"); });
+drop.addEventListener("dragleave", () => drop.classList.remove("drag"));
+drop.addEventListener("drop", (e) => {
+  e.preventDefault();
+  drop.classList.remove("drag");
+  if (e.dataTransfer.files.length) $("in-file").files = e.dataTransfer.files;
+});
+
+initCfg();
+</script>
+</body>
+</html>
